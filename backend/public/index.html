@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Authentication System</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Authentication System</h1>
+      <div id="user-status">
+        <span id="welcome-message"></span>
+        <button id="logout-btn" class="hidden">Logout</button>
+      </div>
+    </header>
+
+    <main>
+      <div id="auth-forms">
+        <!-- Login Form -->
+        <div id="login-form" class="form-container">
+          <h2>Login</h2>
+          <form id="login">
+            <div class="form-group">
+              <label for="login-email">Email</label>
+              <input type="email" id="login-email" required>
+              <span class="error-message"></span>
+            </div>
+            <div class="form-group">
+              <label for="login-password">Password</label>
+              <input type="password" id="login-password" required>
+              <span class="error-message"></span>
+            </div>
+            <button type="submit" class="btn btn-primary">Login</button>
+            <p class="form-switch">Don't have an account? <a href="#" id="show-register">Register</a></p>
+          </form>
+        </div>
+
+        <!-- Register Form -->
+        <div id="register-form" class="form-container hidden">
+          <h2>Create Account</h2>
+          <form id="register">
+            <div class="form-group">
+              <label for="register-username">Username</label>
+              <input type="text" id="register-username" required>
+              <span class="error-message"></span>
+            </div>
+            <div class="form-group">
+              <label for="register-email">Email</label>
+              <input type="email" id="register-email" required>
+              <span class="error-message"></span>
+            </div>
+            <div class="form-group">
+              <label for="register-password">Password</label>
+              <input type="password" id="register-password" required>
+              <span class="password-strength"></span>
+              <span class="error-message"></span>
+            </div>
+            <div class="form-group">
+              <label for="register-confirm-password">Confirm Password</label>
+              <input type="password" id="register-confirm-password" required>
+              <span class="error-message"></span>
+            </div>
+            <button type="submit" class="btn btn-primary">Register</button>
+            <p class="form-switch">Already have an account? <a href="#" id="show-login">Login</a></p>
+          </form>
+        </div>
+      </div>
+
+      <!-- User Dashboard (shown after login) -->
+      <div id="user-dashboard" class="hidden">
+        <h2>Dashboard</h2>
+        <div class="dashboard-content">
+          <p>Welcome to your dashboard!</p>
+          <div class="user-info">
+            <h3>Your Profile</h3>
+            <p><strong>Username:</strong> <span id="profile-username"></span></p>
+            <p><strong>Email:</strong> <span id="profile-email"></span></p>
+            <p><strong>Member since:</strong> <span id="profile-created"></span></p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Toast notification -->
+    <div id="toast" class="toast">
+      <div class="toast-content">
+        <span id="toast-message"></span>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/auth.js"></script>
+</body>
+</html>
