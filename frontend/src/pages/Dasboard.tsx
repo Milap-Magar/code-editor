@@ -1,19 +1,27 @@
 import { useEffect, useState } from "react";
 import { fetchWithAutoRefresh } from "../hooks/useInitalizeAuth";
 import axiosClient from "../auth/axios";
+
 interface User {
   id: number;
   username: string;
+  email: string;
+  created_at: string;
 }
+
 const Dashboard = () => {
-  const [userData, setUserData] = useState("");
+  const [userData, setUserData] = useState<User | null>(null);
+
   useEffect(() => {
     const getUser = async () => {
-      const res = await fetchWithAutoRefresh(() =>
-        axiosClient.get<User>("/me"),
-      );
-      setUserData(res.data.username);
-      console.log(res.data.username);
+      try {
+        const res = await fetchWithAutoRefresh(() =>
+          axiosClient.get<{ success: boolean; user: User }>("/auth/me"),
+        );
+        setUserData(res.data.user);
+      } catch (error) {
+        console.error("Failed to fetch user", error);
+      }
     };
 
     getUser();
@@ -21,8 +29,12 @@ const Dashboard = () => {
 
   return (
     <div>
-      Dashboard - Protected Content
-      <h1>{userData}</h1>
+      <h1>Dashboard - Protected Content</h1>
+      {userData ? (
+        <h2>Welcome, {userData.username}</h2>
+      ) : (
+        <p>Loading user data...</p>
+      )}
     </div>
   );
 };

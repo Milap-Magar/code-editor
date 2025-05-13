@@ -20,7 +20,7 @@ const SignUp = () => {
         axiosClient.post("/auth/register", { username, email, password }),
       );
       console.log("Registration successful");
-      navigate("/sign-in"); // Or maybe navigate to login page
+      navigate("/sign-in");
     } catch (err: any) {
       setError("Sign up failed. Please try again.");
       console.error(
