@@ -1,35 +1,40 @@
 const User = require("../models/userModel");
-const { generateToken, generateRefreshToken } = require("../utils/jwt");
+const {
+  generateToken,
+  generateRefreshToken,
+  verifyRefreshToken,
+} = require("../utils/jwt");
 const bcrypt = require("bcrypt");
-const { verifyRefreshToken } = require("../utils/jwt");
 
-// Authentication controller
 const authController = {
   // Refresh user's token
   refresh: (req, res) => {
     try {
       const token = req.cookies["refresh_token"];
-      if (!token)
-        return res
-          .status(401)
-          .json({ success: false, message: "No refresh token" });
+      if (!token) {
+        return res.status(401).json({
+          success: false,
+          message: "No refresh token",
+        });
+      }
 
-      const payload = verifyRefreshToken(token); // verify the refresh token
-      const newAccessToken = generateToken(payload.id); // generate new access token
+      const payload = verifyRefreshToken(token); // Verify the refresh token
+      const newAccessToken = generateToken(payload.id); // Generate new access token
 
       res.cookie("token", newAccessToken, {
         httpOnly: true,
         maxAge: 15 * 60 * 1000, // 15 minutes
-        sameSite: "strict",
-        secure: process.env.COOKIE_SECURE === "true",
+        sameSite: "strict", // or "lax" depending on your setup
+        secure: process.env.COOKIE_SECURE === "true", // true in production with HTTPS
       });
 
       res.json({ success: true });
     } catch (err) {
       console.error("Refresh token error:", err);
-      return res
-        .status(401)
-        .json({ success: false, message: "Refresh failed" });
+      return res.status(401).json({
+        success: false,
+        message: "Refresh failed",
+      });
     }
   },
 
@@ -38,7 +43,6 @@ const authController = {
     try {
       const { username, email, password } = req.body;
 
-      // Validate input
       if (!username || !email || !password) {
         return res.status(400).json({
           success: false,
@@ -46,7 +50,6 @@ const authController = {
         });
       }
 
-      // Check if username already exists
       const existingUsername = await User.findByUsername(username);
       if (existingUsername) {
         return res.status(400).json({
@@ -55,7 +58,6 @@ const authController = {
         });
       }
 
-      // Check if email already exists
       const existingEmail = await User.findByEmail(email);
       if (existingEmail) {
         return res.status(400).json({
@@ -64,16 +66,23 @@ const authController = {
         });
       }
 
-      // Create new user
       const userId = await User.create({ username, email, password });
 
-      // Generate JWT token
-      const token = generateToken(userId);
+      const accessToken = generateToken(userId);
+      const refreshToken = generateRefreshToken(userId);
 
-      // Set token in cookie
-      res.cookie("token", token, {
+      // Set refresh token cookie
+      res.cookie("refresh_token", refreshToken, {
         httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000, // 1 day
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
+        sameSite: "strict",
+        secure: process.env.COOKIE_SECURE === "true",
+      });
+
+      // Set access token cookie
+      res.cookie("token", accessToken, {
+        httpOnly: true,
+        maxAge: 15 * 60 * 1000, // 15 minutes
         sameSite: "strict",
         secure: process.env.COOKIE_SECURE === "true",
       });
@@ -97,7 +106,6 @@ const authController = {
     try {
       const { email, password } = req.body;
 
-      // Validate input
       if (!email || !password) {
         return res.status(400).json({
           success: false,
@@ -105,7 +113,6 @@ const authController = {
         });
       }
 
-      // Find user by email
       const user = await User.findByEmail(email);
       if (!user) {
         return res.status(401).json({
@@ -114,7 +121,6 @@ const authController = {
         });
       }
 
-      // Compare passwords
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
         return res.status(401).json({
@@ -123,11 +129,10 @@ const authController = {
         });
       }
 
-      // Generate JWT tokens
       const accessToken = generateToken(user.id);
       const refreshToken = generateRefreshToken(user.id);
 
-      // Set refresh token in a secure, HttpOnly cookie
+      // Set refresh token
       res.cookie("refresh_token", refreshToken, {
         httpOnly: true,
         maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
@@ -135,7 +140,7 @@ const authController = {
         secure: process.env.COOKIE_SECURE === "true",
       });
 
-      // Set access token in a secure, HttpOnly cookie
+      // Set access token
       res.cookie("token", accessToken, {
         httpOnly: true,
         maxAge: 15 * 60 * 1000, // 15 minutes
@@ -146,11 +151,7 @@ const authController = {
       res.status(200).json({
         success: true,
         message: "Login successful",
-        user: {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-        },
+        // token: accessToken,
       });
     } catch (error) {
       console.error("Login error:", error);
@@ -163,7 +164,6 @@ const authController = {
 
   // Logout user
   logout: (req, res) => {
-    // Clear both token and refresh token cookies
     res.clearCookie("token");
     res.clearCookie("refresh_token");
     res.status(200).json({
@@ -175,10 +175,7 @@ const authController = {
   // Get current user
   getCurrentUser: async (req, res) => {
     try {
-      // User ID comes from the auth middleware
       const userId = req.user.id;
-
-      // Get user data
       const user = await User.findById(userId);
 
       if (!user) {

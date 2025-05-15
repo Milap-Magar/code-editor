@@ -1,5 +1,6 @@
 import { ArrowRight, Droplets, Play } from "lucide-react";
 import { ButtonWithIcon } from "./ui/Button";
+// import bg from "/assets/bg.jpg";
 
 function HeroSection() {
   return (

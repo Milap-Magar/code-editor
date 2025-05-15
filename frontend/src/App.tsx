@@ -1,24 +1,32 @@
+// App.tsx
 import { Route, BrowserRouter as Router, Routes } from "react-router";
 import { Landing, SignIn, SignUp, Dasboard } from "./pages/";
 import DashboardLayout from "./Layout/DashboardLayout";
+import { CodeSync, Profile, RunCode } from "./pages/secure/";
+import ErrorBoundary from "./Layout/ErrorBoundary";
+import ProtectedRoute from "./Layout/protectedRoutes";
 
 const App = () => {
   return (
-    <Router>
-      <Routes>
-        {/* Entry point for the webapge  */}
-        <Route path="/" element=<Landing /> />
-        {/* Login && Sign Up pages  */}
-        <Route path="/sign-in" element=<SignIn /> />
-        <Route path="/sign-up" element=<SignUp /> />
-
-        {/* must be protected */}
-        <Route path="/dashboard" element={<DashboardLayout />}>
-          <Route index element={<Dasboard />} />
-          {/* <Route path="profile" element={<Profile />} /> */}
-        </Route>
-      </Routes>
-    </Router>
+    <ErrorBoundary>
+      <Router>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<Landing />} />
+          <Route path="/sign-in" element={<SignIn />} />z
+          <Route path="/sign-up" element={<SignUp />} />
+          {/* Protected Routes */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/dashboard" element={<DashboardLayout />}>
+              <Route index element={<Dasboard />} />
+              <Route path="profile" element={<Profile />} />
+              <Route path="codeSync" element={<CodeSync />} />
+              <Route path="run" element={<RunCode />} />
+            </Route>
+          </Route>
+        </Routes>
+      </Router>
+    </ErrorBoundary>
   );
 };
 

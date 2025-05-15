@@ -1,4 +1,4 @@
-import { LayoutDashboard, LogOut, User } from "lucide-react";
+import { Code, File, LayoutDashboard, LogOut, User } from "lucide-react";
 import { NavLink, useNavigate } from "react-router";
 import axiosClient from "../../auth/axios";
 
@@ -8,6 +8,17 @@ const menuItems = [
     icon: <LayoutDashboard className="w-5 h-5" />,
     to: "/dashboard",
   },
+  {
+    label: "Code Sync",
+    icon: <Code className="w-5 h-5" />,
+    to: "/dashboard/codeSync",
+  },
+  {
+    label: "RUN Code",
+    icon: <File className="w-5 h-5" />,
+    to: "/dashboard/run",
+  },
+
   {
     label: "Profile",
     icon: <User className="w-5 h-5" />,
@@ -21,7 +32,7 @@ const Sidebar = () => {
     try {
       const resposne = await axiosClient.post("/auth/logout", {
         method: "POST",
-        creadential: "include",
+        creadential: "true",
       });
       if (resposne.status === 200) {
         return navigate("/sign-in");
